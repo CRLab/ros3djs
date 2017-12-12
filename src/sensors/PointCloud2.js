@@ -23,14 +23,14 @@ function decode64(x) {
     var a = [], z = 0, bits = 0;
 
     for (var i = 0, len = x.length; i < len; i++) {
-      z += BASE64.indexOf( x[i] );
-      bits += 6;
-      if(bits>=8){
-          bits -= 8;
-          a.push(z >> bits);
-          z = z & (Math.pow(2, bits)-1);
-      }
-      z = z << 6;
+        z += BASE64.indexOf( x[i] );
+        bits += 6;
+        if(bits>=8){
+            bits -= 8;
+            a.push(z >> bits);
+            z = z & (Math.pow(2, bits)-1);
+        }
+        z = z << 6;
     }
     return a;
 }
@@ -51,57 +51,71 @@ function decode64(x) {
  *  * color (optional) - point color (otherwise taken from the topic)
  */
 ROS3D.PointCloud2 = function(options) {
-  options = options || {};
-  this.ros = options.ros;
-  this.topicName = options.topic || '/points';
-  this.color = options.color;
+    options = options || {};
+    this.ros = options.ros;
+    this.topicName = options.topic || '/points';
+    this.color = options.color;
 
-  this.particles = new ROS3D.Particles(options);
-  this.rosTopic = undefined;
-  this.subscribe();
+    this.particles = new ROS3D.Particles(options);
+    this.rosTopic = undefined;
+    this.subscribe();
 };
 ROS3D.PointCloud2.prototype.__proto__ = THREE.Object3D.prototype;
 
 
 ROS3D.PointCloud2.prototype.unsubscribe = function(){
-  if(this.rosTopic){
-    this.rosTopic.unsubscribe();
-  }
+    if(this.rosTopic){
+        this.rosTopic.unsubscribe();
+    }
 };
 
 ROS3D.PointCloud2.prototype.subscribe = function(){
-  this.unsubscribe();
+    this.unsubscribe();
 
-  // subscribe to the topic
-  this.rosTopic = new ROSLIB.Topic({
-    ros : this.ros,
-    name : this.topicName,
-    messageType : 'sensor_msgs/PointCloud2'
-  });
-  this.rosTopic.subscribe(this.processMessage.bind(this));
+    // subscribe to the topic
+    this.rosTopic = new ROSLIB.Topic({
+        ros : this.ros,
+        name : this.topicName,
+        messageType : 'sensor_msgs/PointCloud2'
+    });
+    this.rosTopic.subscribe(this.processMessage.bind(this));
 };
 
 ROS3D.PointCloud2.prototype.processMessage = function(message){
-  setFrame(this.particles, message.header.frame_id);
+    // console.log("Got pointcloud message of size " + (message.height * message.width));
+    // return;
 
-  var n = message.height*message.width;
-  var buffer;
-  if(message.data.buffer){
-    buffer = message.data.buffer.buffer;
-  }else{
-    buffer = Uint8Array.from(decode64(message.data)).buffer;
-  }
-  var dv = new DataView(buffer);
-  var color;
-  if(this.color !== undefined){
-    color = new THREE.Color(this.color);
-  }
-  for(var i=0;i<n;i++){
-    var pt = read_point(message, i, dv);
-    this.particles.points[i] = new THREE.Vector3( pt['x'], pt['y'], pt['z'] );
-    this.particles.colors[ i ] = color || new THREE.Color( pt['rgb'] );
-    this.particles.alpha[i] = 1.0;
-  }
+    setFrame(this.particles, message.header.frame_id);
 
-  finishedUpdate(this.particles, n);
+    var n = message.height*message.width;
+    var buffer;
+    if(message.data.buffer){
+        buffer = message.data.buffer.buffer;
+    }else{
+        buffer = Uint8Array.from(decode64(message.data)).buffer;
+    }
+    var dv = new DataView(buffer);
+    var color;
+    if(this.color !== undefined){
+        color = new THREE.Color(this.color);
+    }
+    for(var i=0;i < n;i++){
+        var pt = read_point(message, i, dv);
+        this.particles.positions[3*i + 0] = pt['x'];
+        this.particles.positions[3*i + 1] = pt['y'];
+        this.particles.positions[3*i + 2] = pt['z'];
+
+        var RGBint = pt['rgb'];
+        var Blue =  RGBint & 255;
+        var Green = (RGBint >> 8) & 255;
+        var Red =   (RGBint >> 16) & 255;
+
+        this.particles.colors[3*i + 0] = Red/255.0;
+        this.particles.colors[3*i + 1] = Green/255.0;
+        this.particles.colors[3*i + 2] = Blue/255.0;
+
+        this.particles.alpha[i] = 1.0;
+    }
+
+    finishedUpdate(this.particles, n);
 };

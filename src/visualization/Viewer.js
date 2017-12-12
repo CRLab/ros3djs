@@ -20,123 +20,122 @@
  *  * cameraPosition (optional) - the starting position of the camera
  */
 ROS3D.Viewer = function(options) {
-  options = options || {};
-  var divID = options.divID;
-  var width = options.width;
-  var height = options.height;
-  var background = options.background || '#111111';
-  var antialias = options.antialias;
-  var intensity = options.intensity || 0.66;
-  var near = options.near || 0.01;
-  var far = options.far || 1000;
-  var alpha = options.alpha || 1.0;
-  var cameraPosition = options.cameraPose || {
-    x : 3,
-    y : 3,
-    z : 3
-  };
-  var cameraZoomSpeed = options.cameraZoomSpeed || 0.5;
+    options = options || {};
+    console.log(options);
+    console.log($("#viewer"));
+    var divID = options.divID;
+    var width = options.width;
+    var height = options.height;
+    var background = options.background || '#111111';
+    var antialias = options.antialias;
+    var intensity = options.intensity || 0.66;
+    var near = options.near || 0.01;
+    var far = options.far || 1000;
+    var alpha = options.alpha || 1.0;
+    var cameraPosition = options.cameraPose || {
+        x : 3,
+        y : 3,
+        z : 3
+    };
+    var cameraZoomSpeed = options.cameraZoomSpeed || 0.5;
 
-  // create the canvas to render to
-  this.renderer = new THREE.WebGLRenderer({
-    antialias : antialias,
-    alpha: true
-  });
-  this.renderer.setClearColor(parseInt(background.replace('#', '0x'), 16), alpha);
-  this.renderer.sortObjects = false;
-  this.renderer.setSize(width, height);
-  this.renderer.shadowMapEnabled = false;
-  this.renderer.autoClear = false;
+    // create the canvas to render to
+    this.renderer = new THREE.WebGLRenderer({
+        antialias : antialias,
+        alpha: true
+    });
+    this.renderer.setClearColor(parseInt(background.replace('#', '0x'), 16), alpha);
+    this.renderer.sortObjects = false;
+    this.renderer.setSize(width, height);
+    this.renderer.shadowMap.enabled = false;
+    this.renderer.autoClear = false;
 
-  // create the global scene
-  this.scene = new THREE.Scene();
+    // create the global scene
+    this.scene = new THREE.Scene();
 
-  // create the global camera
-  this.camera = new THREE.PerspectiveCamera(40, width / height, near, far);
-  this.camera.position.x = cameraPosition.x;
-  this.camera.position.y = cameraPosition.y;
-  this.camera.position.z = cameraPosition.z;
-  // add controls to the camera
-  this.cameraControls = new ROS3D.OrbitControls({
-    scene : this.scene,
-    camera : this.camera
-  });
-  this.cameraControls.userZoomSpeed = cameraZoomSpeed;
+    // create the global camera
+    this.camera = new THREE.PerspectiveCamera(40, width / height, near, far);
+    this.camera.position.x = cameraPosition.x;
+    this.camera.position.y = cameraPosition.y;
+    this.camera.position.z = cameraPosition.z;
+    // add controls to the camera
+    this.cameraControls = new ROS3D.OrbitControls({
+        scene : this.scene,
+        camera : this.camera
+    });
+    this.cameraControls.userZoomSpeed = cameraZoomSpeed;
 
-  // lights
-  this.scene.add(new THREE.AmbientLight(0x555555));
-  this.directionalLight = new THREE.DirectionalLight(0xffffff, intensity);
-  this.scene.add(this.directionalLight);
+    // lights
+    this.scene.add(new THREE.AmbientLight(0x555555));
+    this.directionalLight = new THREE.DirectionalLight(0xffffff, intensity);
+    this.scene.add(this.directionalLight);
 
-  // propagates mouse events to three.js objects
-  this.selectableObjects = new THREE.Object3D();
-  this.scene.add(this.selectableObjects);
-  var mouseHandler = new ROS3D.MouseHandler({
-    renderer : this.renderer,
-    camera : this.camera,
-    rootObject : this.selectableObjects,
-    fallbackTarget : this.cameraControls
-  });
+    // propagates mouse events to three.js objects
+    this.selectableObjects = new THREE.Object3D();
+    this.scene.add(this.selectableObjects);
+    var mouseHandler = new ROS3D.MouseHandler({
+        renderer : this.renderer,
+        camera : this.camera,
+        rootObject : this.selectableObjects,
+        fallbackTarget : this.cameraControls
+    });
 
-  // highlights the receiver of mouse events
-  this.highlighter = new ROS3D.Highlighter({
-    mouseHandler : mouseHandler
-  });
+    // highlights the receiver of mouse events
+    this.highlighter = new ROS3D.Highlighter({
+        mouseHandler : mouseHandler
+    });
 
-  this.stopped = true;
-  this.animationRequestId = undefined;
+    this.stopped = true;
+    this.animationRequestId = undefined;
 
-  // add the renderer to the page
-  document.getElementById(divID).appendChild(this.renderer.domElement);
+    // add the renderer to the page
+    document.getElementById(divID).appendChild(this.renderer.domElement);
 
-  // begin the render loop
-  this.start();
+    // begin the render loop
+    this.start();
 };
 
 /**
  *  Start the render loop
  */
 ROS3D.Viewer.prototype.start = function(){
-  this.stopped = false;
-  this.draw();
+    this.stopped = false;
+    this.draw();
 };
 
 /**
  * Renders the associated scene to the viewer.
  */
 ROS3D.Viewer.prototype.draw = function(){
-  if(this.stopped){
-    // Do nothing if stopped
-    return;
-  }
+    if(this.stopped){
+        // Do nothing if stopped
+        return;
+    }
 
-  // update the controls
-  this.cameraControls.update();
+    // update the controls
+    this.cameraControls.update();
 
-  // put light to the top-left of the camera
-  this.directionalLight.position = this.camera.localToWorld(new THREE.Vector3(-1, 1, 0));
-  this.directionalLight.position.normalize();
+    // put light to the top-left of the camera
+    this.directionalLight.position = this.camera.localToWorld(new THREE.Vector3(-1, 1, 0));
+    this.directionalLight.position.normalize();
 
-  // set the scene
-  this.renderer.clear(true, true, true);
-  this.renderer.render(this.scene, this.camera);
+    // set the scene
+    this.renderer.clear(true, true, true);
+    this.renderer.render(this.scene, this.camera);
 
-  // render any mouseovers
-  this.highlighter.renderHighlight(this.renderer, this.scene, this.camera);
-
-  // draw the frame
-  this.animationRequestId = requestAnimationFrame(this.draw.bind(this));
+    // draw the frame
+    this.animationRequestId = requestAnimationFrame(this.draw.bind(this));
 };
 
 /**
  *  Stop the render loop
  */
 ROS3D.Viewer.prototype.stop = function(){
-  if(!this.stopped){
-    // Stop animation render loop
-    cancelAnimationFrame(this.animationRequestId);
-  }
-  this.stopped = true;
+    if(!this.stopped){
+        // Stop animation render loop
+        cancelAnimationFrame(this.animationRequestId);
+    }
+    this.stopped = true;
 };
 
 /**
@@ -146,11 +145,11 @@ ROS3D.Viewer.prototype.stop = function(){
  * @param selectable (optional) - if the object should be added to the selectable list
  */
 ROS3D.Viewer.prototype.addObject = function(object, selectable) {
-  if (selectable) {
-    this.selectableObjects.add(object);
-  } else {
-    this.scene.add(object);
-  }
+    if (selectable) {
+        this.selectableObjects.add(object);
+    } else {
+        this.scene.add(object);
+    }
 };
 
 /**
@@ -160,7 +159,7 @@ ROS3D.Viewer.prototype.addObject = function(object, selectable) {
  * @param height - new height value
  */
 ROS3D.Viewer.prototype.resize = function(width, height) {
-  this.camera.aspect = width / height;
-  this.camera.updateProjectionMatrix();
-  this.renderer.setSize(width, height);
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(width, height);
 };

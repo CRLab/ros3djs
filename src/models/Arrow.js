@@ -17,36 +17,37 @@
  *   * material (optional) - the material to use for this arrow
  */
 ROS3D.Arrow = function(options) {
-  options = options || {};
-  var origin = options.origin || new THREE.Vector3(0, 0, 0);
-  var direction = options.direction || new THREE.Vector3(1, 0, 0);
-  var length = options.length || 1;
-  var headLength = options.headLength || 0.2;
-  var shaftDiameter = options.shaftDiameter || 0.05;
-  var headDiameter = options.headDiameter || 0.1;
-  var material = options.material || new THREE.MeshBasicMaterial();
+    options = options || {};
+    var origin = options.origin || new THREE.Vector3(0, 0, 0);
+    var direction = options.direction || new THREE.Vector3(1, 0, 0);
+    var length = options.length || 1;
+    var headLength = options.headLength || 0.2;
+    var shaftDiameter = options.shaftDiameter || 0.05;
+    var headDiameter = options.headDiameter || 0.1;
+    var material = options.material || new THREE.MeshBasicMaterial();
 
-  var shaftLength = length - headLength;
+    var shaftLength = length - headLength;
 
-  // create and merge geometry
-  var geometry = new THREE.CylinderGeometry(shaftDiameter * 0.5, shaftDiameter * 0.5, shaftLength,
-      12, 1);
-  var m = new THREE.Matrix4();
-  m.setPosition(new THREE.Vector3(0, shaftLength * 0.5, 0));
-  geometry.applyMatrix(m);
+    // create and merge geometry
+    var geometry = new THREE.CylinderGeometry(shaftDiameter * 0.5, shaftDiameter * 0.5, shaftLength,
+        12, 1);
+    var m = new THREE.Matrix4();
+    m.setPosition(new THREE.Vector3(0, shaftLength * 0.5, 0));
+    geometry.applyMatrix(m);
 
-  // create the head
-  var coneGeometry = new THREE.CylinderGeometry(0, headDiameter * 0.5, headLength, 12, 1);
-  m.setPosition(new THREE.Vector3(0, shaftLength + (headLength * 0.5), 0));
-  coneGeometry.applyMatrix(m);
+    // create the head
+    var coneGeometry = new THREE.CylinderGeometry(0, headDiameter * 0.5, headLength, 12, 1);
+    m.setPosition(new THREE.Vector3(0, shaftLength + (headLength * 0.5), 0));
+    coneGeometry.applyMatrix(m);
 
-  // put the arrow together
-  THREE.GeometryUtils.merge(geometry, coneGeometry);
+    // put the arrow together
+    // DEPRECATED: THREE.GeometryUtils.merge(geometry, coneGeometry);
+    geometry.merge(coneGeometry);
 
-  THREE.Mesh.call(this, geometry, material);
+    THREE.Mesh.call(this, geometry, material);
 
-  this.position = origin;
-  this.setDirection(direction);
+    this.position.copy(origin);
+    this.setDirection(direction);
 };
 ROS3D.Arrow.prototype.__proto__ = THREE.Mesh.prototype;
 
@@ -56,10 +57,10 @@ ROS3D.Arrow.prototype.__proto__ = THREE.Mesh.prototype;
  * @param direction - the direction to set this arrow
  */
 ROS3D.Arrow.prototype.setDirection = function(direction) {
-  var axis = new THREE.Vector3(0, 1, 0).cross(direction);
-  var radians = Math.acos(new THREE.Vector3(0, 1, 0).dot(direction.clone().normalize()));
-  this.matrix = new THREE.Matrix4().makeRotationAxis(axis.normalize(), radians);
-  this.rotation.setFromRotationMatrix(this.matrix, this.rotation.order);
+    var axis = new THREE.Vector3(0, 1, 0).cross(direction);
+    var radians = Math.acos(new THREE.Vector3(0, 1, 0).dot(direction.clone().normalize()));
+    this.matrix = new THREE.Matrix4().makeRotationAxis(axis.normalize(), radians);
+    this.rotation.setFromRotationMatrix(this.matrix, this.rotation.order);
 };
 
 /**
@@ -68,7 +69,7 @@ ROS3D.Arrow.prototype.setDirection = function(direction) {
  * @param length - the new length of the arrow
  */
 ROS3D.Arrow.prototype.setLength = function(length) {
-  this.scale.set(length, length, length);
+    this.scale.set(length, length, length);
 };
 
 /**
@@ -77,17 +78,17 @@ ROS3D.Arrow.prototype.setLength = function(length) {
  * @param hex - the hex value of the color to use
  */
 ROS3D.Arrow.prototype.setColor = function(hex) {
-  this.material.color.setHex(hex);
+    this.material.color.setHex(hex);
 };
 
 /*
  * Free memory of elements in this marker.
  */
 ROS3D.Arrow.prototype.dispose = function() {
-  if (this.geometry !== undefined) {
-      this.geometry.dispose();
-  }
-  if (this.material !== undefined) {
-      this.material.dispose();
-  }
+    if (this.geometry !== undefined) {
+        this.geometry.dispose();
+    }
+    if (this.material !== undefined) {
+        this.material.dispose();
+    }
 };

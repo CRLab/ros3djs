@@ -15,56 +15,56 @@
  *                        ROS3D.COLLADA_LOADER_2) -- defaults to ROS3D.COLLADA_LOADER_2
  */
 ROS3D.InteractiveMarker = function(options) {
-  THREE.Object3D.call(this);
-  THREE.EventDispatcher.call(this);
+    THREE.Object3D.call(this);
+    THREE.EventDispatcher.call(this);
 
-  var that = this;
-  options = options || {};
-  var handle = options.handle;
-  this.name = handle.name;
-  var camera = options.camera;
-  var path = options.path || '/';
-  var loader = options.loader || ROS3D.COLLADA_LOADER_2;
-  this.dragging = false;
+    var that = this;
+    options = options || {};
+    var handle = options.handle;
+    this.name = handle.name;
+    var camera = options.camera;
+    var path = options.path || '/';
+    var loader = options.loader || ROS3D.COLLADA_LOADER_2;
+    this.dragging = false;
 
-  // set the initial pose
-  this.onServerSetPose({
-    pose : handle.pose
-  });
-
-  // information on where the drag started
-  this.dragStart = {
-    position : new THREE.Vector3(),
-    orientation : new THREE.Quaternion(),
-    positionWorld : new THREE.Vector3(),
-    orientationWorld : new THREE.Quaternion(),
-    event3d : {}
-  };
-
-  // add each control message
-  handle.controls.forEach(function(controlMessage) {
-    that.add(new ROS3D.InteractiveMarkerControl({
-      parent : that,
-      handle : handle,
-      message : controlMessage,
-      camera : camera,
-      path : path,
-      loader : loader
-    }));
-  });
-
-  // check for any menus
-  if (handle.menuEntries.length > 0) {
-    this.menu = new ROS3D.InteractiveMarkerMenu({
-      menuEntries : handle.menuEntries,
-      menuFontSize : handle.menuFontSize
+    // set the initial pose
+    this.onServerSetPose({
+        pose : handle.pose
     });
 
-    // forward menu select events
-    this.menu.addEventListener('menu-select', function(event) {
-      that.dispatchEvent(event);
+    // information on where the drag started
+    this.dragStart = {
+        position : new THREE.Vector3(),
+        orientation : new THREE.Quaternion(),
+        positionWorld : new THREE.Vector3(),
+        orientationWorld : new THREE.Quaternion(),
+        event3d : {}
+    };
+
+    // add each control message
+    handle.controls.forEach(function(controlMessage) {
+        that.add(new ROS3D.InteractiveMarkerControl({
+            parent : that,
+            handle : handle,
+            message : controlMessage,
+            camera : camera,
+            path : path,
+            loader : loader
+        }));
     });
-  }
+
+    // check for any menus
+    if (handle.menuEntries.length > 0) {
+        this.menu = new ROS3D.InteractiveMarkerMenu({
+            menuEntries : handle.menuEntries,
+            menuFontSize : handle.menuFontSize
+        });
+
+        // forward menu select events
+        this.menu.addEventListener('menu-select', function(event) {
+            that.dispatchEvent(event);
+        });
+    }
 };
 ROS3D.InteractiveMarker.prototype.__proto__ = THREE.Object3D.prototype;
 
@@ -75,9 +75,9 @@ ROS3D.InteractiveMarker.prototype.__proto__ = THREE.Object3D.prototype;
  * @param event - the event that caused this
  */
 ROS3D.InteractiveMarker.prototype.showMenu = function(control, event) {
-  if (this.menu) {
-    this.menu.show(control, event);
-  }
+    if (this.menu) {
+        this.menu.show(control, event);
+    }
 };
 
 /**
@@ -88,26 +88,27 @@ ROS3D.InteractiveMarker.prototype.showMenu = function(control, event) {
  * @param event3d - the event that caused this
  */
 ROS3D.InteractiveMarker.prototype.moveAxis = function(control, origAxis, event3d) {
-  if (this.dragging) {
-    var currentControlOri = control.currentControlOri;
-    var axis = origAxis.clone().applyQuaternion(currentControlOri);
-    // get move axis in world coords
-    var originWorld = this.dragStart.event3d.intersection.point;
-    var axisWorld = axis.clone().applyQuaternion(this.dragStart.orientationWorld.clone());
+    if (this.dragging) {
+        var currentControlOri = control.currentControlOri;
+        var axis = origAxis.clone().applyQuaternion(currentControlOri);
+        // get move axis in world coords
+        var originWorld = this.dragStart.event3d.intersection.point;
+        var axisWorld = axis.clone().applyQuaternion(this.dragStart.orientationWorld.clone());
 
-    var axisRay = new THREE.Ray(originWorld, axisWorld);
+        var axisRay = new THREE.Ray(originWorld, axisWorld);
 
-    // find closest point to mouse on axis
-    var t = ROS3D.closestAxisPoint(axisRay, event3d.camera, event3d.mousePos);
+        // find closest point to mouse on axis
+        var t = ROS3D.closestAxisPoint(axisRay, event3d.camera, event3d.mousePos);
 
-    // offset from drag start position
-    var p = new THREE.Vector3();
-    p.addVectors(this.dragStart.position, axis.clone().applyQuaternion(this.dragStart.orientation)
-        .multiplyScalar(t));
-    this.setPosition(control, p);
+        // offset from drag start position
+        var p = new THREE.Vector3();
+        p.addVectors(this.dragStart.position, axis.clone().applyQuaternion(this.dragStart.orientation)
+            .multiplyScalar(t));
+        this.setPosition(control, p);
 
-    event3d.stopPropagation();
-  }
+
+        event3d.stopPropagation();
+    }
 };
 
 /**
@@ -118,23 +119,23 @@ ROS3D.InteractiveMarker.prototype.moveAxis = function(control, origAxis, event3d
  * @param event3d - the event that caused this
  */
 ROS3D.InteractiveMarker.prototype.movePlane = function(control, origNormal, event3d) {
-  if (this.dragging) {
-    var currentControlOri = control.currentControlOri;
-    var normal = origNormal.clone().applyQuaternion(currentControlOri);
-    // get plane params in world coords
-    var originWorld = this.dragStart.event3d.intersection.point;
-    var normalWorld = normal.clone().applyQuaternion(this.dragStart.orientationWorld);
+    if (this.dragging) {
+        var currentControlOri = control.currentControlOri;
+        var normal = origNormal.clone().applyQuaternion(currentControlOri);
+        // get plane params in world coords
+        var originWorld = this.dragStart.event3d.intersection.point;
+        var normalWorld = normal.clone().applyQuaternion(this.dragStart.orientationWorld);
 
-    // intersect mouse ray with plane
-    var intersection = ROS3D.intersectPlane(event3d.mouseRay, originWorld, normalWorld);
+        // intersect mouse ray with plane
+        var intersection = ROS3D.intersectPlane(event3d.mouseRay, originWorld, normalWorld);
 
-    // offset from drag start position
-    var p = new THREE.Vector3();
-    p.subVectors(intersection, originWorld);
-    p.add(this.dragStart.positionWorld);
-    this.setPosition(control, p);
-    event3d.stopPropagation();
-  }
+        // offset from drag start position
+        var p = new THREE.Vector3();
+        p.subVectors(intersection, originWorld);
+        p.add(this.dragStart.positionWorld);
+        this.setPosition(control, p);
+        event3d.stopPropagation();
+    }
 };
 
 /**
@@ -145,51 +146,51 @@ ROS3D.InteractiveMarker.prototype.movePlane = function(control, origNormal, even
  * @param event3d - the event that caused this
  */
 ROS3D.InteractiveMarker.prototype.rotateAxis = function(control, origOrientation, event3d) {
-  if (this.dragging) {
-    control.updateMatrixWorld();
+    if (this.dragging) {
+        control.updateMatrixWorld();
 
-    var currentControlOri = control.currentControlOri;
-    var orientation = currentControlOri.clone().multiply(origOrientation.clone());
+        var currentControlOri = control.currentControlOri;
+        var orientation = currentControlOri.clone().multiply(origOrientation.clone());
 
-    var normal = (new THREE.Vector3(1, 0, 0)).applyQuaternion(orientation);
+        var normal = (new THREE.Vector3(1, 0, 0)).applyQuaternion(orientation);
 
-    // get plane params in world coords
-    var originWorld = this.dragStart.event3d.intersection.point;
-    var normalWorld = normal.applyQuaternion(this.dragStart.orientationWorld);
+        // get plane params in world coords
+        var originWorld = this.dragStart.event3d.intersection.point;
+        var normalWorld = normal.applyQuaternion(this.dragStart.orientationWorld);
 
-    // intersect mouse ray with plane
-    var intersection = ROS3D.intersectPlane(event3d.mouseRay, originWorld, normalWorld);
+        // intersect mouse ray with plane
+        var intersection = ROS3D.intersectPlane(event3d.mouseRay, originWorld, normalWorld);
 
-    // offset local origin to lie on intersection plane
-    var normalRay = new THREE.Ray(this.dragStart.positionWorld, normalWorld);
-    var rotOrigin = ROS3D.intersectPlane(normalRay, originWorld, normalWorld);
+        // offset local origin to lie on intersection plane
+        var normalRay = new THREE.Ray(this.dragStart.positionWorld, normalWorld);
+        var rotOrigin = ROS3D.intersectPlane(normalRay, originWorld, normalWorld);
 
-    // rotates from world to plane coords
-    var orientationWorld = this.dragStart.orientationWorld.clone().multiply(orientation);
-    var orientationWorldInv = orientationWorld.clone().inverse();
+        // rotates from world to plane coords
+        var orientationWorld = this.dragStart.orientationWorld.clone().multiply(orientation);
+        var orientationWorldInv = orientationWorld.clone().inverse();
 
-    // rotate original and current intersection into local coords
-    intersection.sub(rotOrigin);
-    intersection.applyQuaternion(orientationWorldInv);
+        // rotate original and current intersection into local coords
+        intersection.sub(rotOrigin);
+        intersection.applyQuaternion(orientationWorldInv);
 
-    var origIntersection = this.dragStart.event3d.intersection.point.clone();
-    origIntersection.sub(rotOrigin);
-    origIntersection.applyQuaternion(orientationWorldInv);
+        var origIntersection = this.dragStart.event3d.intersection.point.clone();
+        origIntersection.sub(rotOrigin);
+        origIntersection.applyQuaternion(orientationWorldInv);
 
-    // compute relative 2d angle
-    var a1 = Math.atan2(intersection.y, intersection.z);
-    var a2 = Math.atan2(origIntersection.y, origIntersection.z);
-    var a = a2 - a1;
+        // compute relative 2d angle
+        var a1 = Math.atan2(intersection.y, intersection.z);
+        var a2 = Math.atan2(origIntersection.y, origIntersection.z);
+        var a = a2 - a1;
 
-    var rot = new THREE.Quaternion();
-    rot.setFromAxisAngle(normal, a);
+        var rot = new THREE.Quaternion();
+        rot.setFromAxisAngle(normal, a);
 
-    // rotate
-    this.setOrientation(control, rot.multiply(this.dragStart.orientationWorld));
+        // rotate
+        this.setOrientation(control, rot.multiply(this.dragStart.orientationWorld));
 
-    // offset from drag start position
-    event3d.stopPropagation();
-  }
+        // offset from drag start position
+        event3d.stopPropagation();
+    }
 };
 
 /**
@@ -199,12 +200,12 @@ ROS3D.InteractiveMarker.prototype.rotateAxis = function(control, origOrientation
  * @param control - the control to use
  */
 ROS3D.InteractiveMarker.prototype.feedbackEvent = function(type, control) {
-  this.dispatchEvent({
-    type : type,
-    position : this.position.clone(),
-    orientation : this.quaternion.clone(),
-    controlName : control.name
-  });
+    this.dispatchEvent({
+        type : type,
+        position : this.position.clone(),
+        orientation : this.quaternion.clone(),
+        controlName : control.name
+    });
 };
 
 /**
@@ -214,19 +215,19 @@ ROS3D.InteractiveMarker.prototype.feedbackEvent = function(type, control) {
  * @param event3d - the event that caused this
  */
 ROS3D.InteractiveMarker.prototype.startDrag = function(control, event3d) {
-  if (event3d.domEvent.button === 0) {
-    event3d.stopPropagation();
-    this.dragging = true;
-    this.updateMatrixWorld(true);
-    var scale = new THREE.Vector3();
-    this.matrixWorld
-        .decompose(this.dragStart.positionWorld, this.dragStart.orientationWorld, scale);
-    this.dragStart.position = this.position.clone();
-    this.dragStart.orientation = this.quaternion.clone();
-    this.dragStart.event3d = event3d;
+    if (event3d.domEvent.button === 0) {
+        event3d.stopPropagation();
+        this.dragging = true;
+        this.updateMatrixWorld(true);
+        var scale = new THREE.Vector3();
+        this.matrixWorld
+            .decompose(this.dragStart.positionWorld, this.dragStart.orientationWorld, scale);
+        this.dragStart.position = this.position.clone();
+        this.dragStart.orientation = this.quaternion.clone();
+        this.dragStart.event3d = event3d;
 
-    this.feedbackEvent('user-mousedown', control);
-  }
+        this.feedbackEvent('user-mousedown', control);
+    }
 };
 
 /**
@@ -236,15 +237,15 @@ ROS3D.InteractiveMarker.prototype.startDrag = function(control, event3d) {
  * @param event3d - the event that caused this
  */
 ROS3D.InteractiveMarker.prototype.stopDrag = function(control, event3d) {
-  if (event3d.domEvent.button === 0) {
-    event3d.stopPropagation();
-    this.dragging = false;
-    this.dragStart.event3d = {};
-    this.onServerSetPose(this.bufferedPoseEvent);
-    this.bufferedPoseEvent = undefined;
+    if (event3d.domEvent.button === 0) {
+        event3d.stopPropagation();
+        this.dragging = false;
+        this.dragStart.event3d = {};
+        this.onServerSetPose(this.bufferedPoseEvent);
+        this.bufferedPoseEvent = undefined;
 
-    this.feedbackEvent('user-mouseup', control);
-  }
+        this.feedbackEvent('user-mouseup', control);
+    }
 };
 
 /**
@@ -254,8 +255,8 @@ ROS3D.InteractiveMarker.prototype.stopDrag = function(control, event3d) {
  * @param event3d - the event that caused this
  */
 ROS3D.InteractiveMarker.prototype.buttonClick = function(control, event3d) {
-  event3d.stopPropagation();
-  this.feedbackEvent('user-button-click', control);
+    event3d.stopPropagation();
+    this.feedbackEvent('user-button-click', control);
 };
 
 /**
@@ -265,8 +266,8 @@ ROS3D.InteractiveMarker.prototype.buttonClick = function(control, event3d) {
  * @param event3d - the event that caused this
  */
 ROS3D.InteractiveMarker.prototype.setPosition = function(control, position) {
-  this.position = position;
-  this.feedbackEvent('user-pose-change', control);
+    this.position.copy(position);
+    this.feedbackEvent('user-pose-change', control);
 };
 
 /**
@@ -276,9 +277,9 @@ ROS3D.InteractiveMarker.prototype.setPosition = function(control, position) {
  * @param event3d - the event that caused this
  */
 ROS3D.InteractiveMarker.prototype.setOrientation = function(control, orientation) {
-  orientation.normalize();
-  this.quaternion = orientation;
-  this.feedbackEvent('user-pose-change', control);
+    orientation.normalize();
+    this.quaternion.copy(orientation);
+    this.feedbackEvent('user-pose-change', control);
 };
 
 /**
@@ -287,37 +288,38 @@ ROS3D.InteractiveMarker.prototype.setOrientation = function(control, orientation
  * @param event - the event that caused this
  */
 ROS3D.InteractiveMarker.prototype.onServerSetPose = function(event) {
-  if (event !== undefined) {
-    // don't update while dragging
-    if (this.dragging) {
-      this.bufferedPoseEvent = event;
-    } else {
-      var pose = event.pose;
+    if (event !== undefined) {
+        // don't update while dragging
+        if (this.dragging) {
+            this.bufferedPoseEvent = event;
+        } else {
+            var pose = event.pose;
 
-      this.position.x = pose.position.x;
-      this.position.y = pose.position.y;
-      this.position.z = pose.position.z;
+            this.position.x = pose.position.x;
+            this.position.y = pose.position.y;
+            this.position.z = pose.position.z;
 
-      this.quaternion = new THREE.Quaternion(pose.orientation.x, pose.orientation.y,
-          pose.orientation.z, pose.orientation.w);
+            this.quaternion.copy(new THREE.Quaternion(pose.orientation.x, pose.orientation.y,
+                pose.orientation.z, pose.orientation.w));
 
-      this.updateMatrixWorld(true);
+            this.updateMatrixWorld(true);
+        }
     }
-  }
 };
 
 /**
  * Free memory of elements in this marker.
  */
 ROS3D.InteractiveMarker.prototype.dispose = function() {
-  var that = this;
-  this.children.forEach(function(intMarkerControl) {
-    intMarkerControl.children.forEach(function(marker) {
-      marker.dispose();
-      intMarkerControl.remove(marker);
+    var that = this;
+    this.children.forEach(function(intMarkerControl) {
+        intMarkerControl.children.forEach(function(marker) {
+            marker.dispose();
+            intMarkerControl.remove(marker);
+        });
+        that.remove(intMarkerControl);
     });
-    that.remove(intMarkerControl);
-  });
 };
 
-THREE.EventDispatcher.prototype.apply( ROS3D.InteractiveMarker.prototype );
+// THREE.EventDispatcher.prototype.apply( ROS3D.InteractiveMarker.prototype );
+Object.assign(ROS3D.InteractiveMarker.prototype, THREE.EventDispatcher.prototype);

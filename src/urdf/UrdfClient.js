@@ -24,35 +24,35 @@
  *                         ROS3D.COLLADA_LOADER_2) -- defaults to ROS3D.COLLADA_LOADER_2
  */
 ROS3D.UrdfClient = function(options) {
-  var that = this;
-  options = options || {};
-  var ros = options.ros;
-  this.param = options.param || 'robot_description';
-  this.path = options.path || '/';
-  this.tfClient = options.tfClient;
-  this.rootObject = options.rootObject || new THREE.Object3D();
-  this.tfPrefix = options.tfPrefix || '';
-  this.loader = options.loader || ROS3D.COLLADA_LOADER_2;
+    var that = this;
+    options = options || {};
+    var ros = options.ros;
+    this.param = options.param || 'robot_description';
+    this.path = options.path || '/';
+    this.tfClient = options.tfClient;
+    this.rootObject = options.rootObject || new THREE.Object3D();
+    this.tfPrefix = options.tfPrefix || '';
+    this.loader = options.loader || ROS3D.COLLADA_LOADER_2;
 
-  // get the URDF value from ROS
-  var getParam = new ROSLIB.Param({
-    ros : ros,
-    name : this.param
-  });
-  getParam.get(function(string) {
-    // hand off the XML string to the URDF model
-    var urdfModel = new ROSLIB.UrdfModel({
-      string : string
+    // get the URDF value from ROS
+    var getParam = new ROSLIB.Param({
+        ros : ros,
+        name : this.param
     });
+    getParam.get(function(string) {
+        // hand off the XML string to the URDF model
+        var urdfModel = new ROSLIB.UrdfModel({
+            string : string
+        });
 
-    // load all models
-    that.urdf = new ROS3D.Urdf({
-      urdfModel : urdfModel,
-      path : that.path,
-      tfClient : that.tfClient,
-      tfPrefix : that.tfPrefix,
-      loader : that.loader
+        // load all models
+        that.urdf = new ROS3D.Urdf({
+            urdfModel : urdfModel,
+            path : that.path,
+            tfClient : that.tfClient,
+            tfPrefix : that.tfPrefix,
+            loader : that.loader
+        });
+        that.rootObject.add(that.urdf);
     });
-    that.rootObject.add(that.urdf);
-  });
 };

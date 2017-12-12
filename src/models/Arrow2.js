@@ -17,16 +17,16 @@
  *   * material (optional) - the material to use for this arrow
  */
 ROS3D.Arrow2 = function(options) {
-  options = options || {};
-  var origin = options.origin || new THREE.Vector3(0, 0, 0);
-  var direction = options.direction || new THREE.Vector3(1, 0, 0);
-  var length = options.length || 1;
-  var headLength = options.headLength || 0.2;
-  var shaftDiameter = options.shaftDiameter || 0.05;
-  var headDiameter = options.headDiameter || 0.1;
-  var material = options.material || new THREE.MeshBasicMaterial();
+    options = options || {};
+    var origin = options.origin || new THREE.Vector3(0, 0, 0);
+    var direction = options.direction || new THREE.Vector3(1, 0, 0);
+    var length = options.length || 1;
+    var headLength = options.headLength || 0.2;
+    var shaftDiameter = options.shaftDiameter || 0.05;
+    var headDiameter = options.headDiameter || 0.1;
+    var material = options.material || new THREE.MeshBasicMaterial();
 
-  THREE.ArrowHelper.call(this, direction, origin, length, 0xff0000);
+    THREE.ArrowHelper.call(this, direction, origin, length, 0xff0000);
 
 };
 
@@ -36,14 +36,14 @@ ROS3D.Arrow2.prototype.__proto__ = THREE.ArrowHelper.prototype;
  * Free memory of elements in this object.
  */
 ROS3D.Arrow2.prototype.dispose = function() {
-  if (this.line !== undefined) {
-      this.line.material.dispose();
-      this.line.geometry.dispose();
-  }
-  if (this.cone!== undefined) {
-      this.cone.material.dispose();
-      this.cone.geometry.dispose();
-  }
+    if (this.line !== undefined) {
+        this.line.material.dispose();
+        this.line.geometry.dispose();
+    }
+    if (this.cone!== undefined) {
+        this.cone.material.dispose();
+        this.cone.geometry.dispose();
+    }
 };
 
 /*
