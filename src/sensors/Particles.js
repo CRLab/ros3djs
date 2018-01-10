@@ -122,7 +122,7 @@ function finishedUpdate(particles, n)
 {
     if(particles.first_size === null){
         particles.first_size = n;
-        particles.max_pts = Math.max(particles.max_pts, n);
+        particles.max_pts = Math.min(particles.max_pts, n);
     }
 
     for(var i=n; i<particles.prev_pts; i++){
@@ -134,7 +134,7 @@ function finishedUpdate(particles, n)
     particles.geom.attributes.color.needsUpdate = true;
     particles.geom.attributes.alpha.needsUpdate = true;
 
-    if(n>particles.max_pts){
-        console.error('Attempted to draw more points than max_pts allows');
-    }
+    // if(n>particles.max_pts){
+    //     console.error('Attempted to draw more points than max_pts allows');
+    // }
 }
