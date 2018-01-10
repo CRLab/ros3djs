@@ -95,6 +95,11 @@ ROS3D.Viewer = function(options) {
     this.start();
 };
 
+ROS3D.Viewer.prototype.setBackgroundColor = function(color){
+    this.renderer.setClearColor(parseInt(color.replace('#', '0x'), 16), this.renderer.alpha);
+};
+
+
 /**
  *  Start the render loop
  */
