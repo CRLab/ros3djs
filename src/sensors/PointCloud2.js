@@ -67,6 +67,10 @@ ROS3D.PointCloud2.prototype.unsubscribe = function(){
     if(this.rosTopic){
         this.rosTopic.unsubscribe();
     }
+
+    if (this.particles) {
+        finishedUpdate(this.particles, 0);
+    }
 };
 
 ROS3D.PointCloud2.prototype.subscribe = function(){
